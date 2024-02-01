@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,7 +15,7 @@ type Page struct {
 }
 
 var (
-	templates = template.Must(template.ParseFiles("templates/edit.html", "templates/view.html"))
+	templates = template.Must(template.ParseFiles("templates/index.html", "templates/edit.html", "templates/view.html"))
 	validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 )
 
@@ -68,23 +67,24 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func tocHandler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	files, err := os.ReadDir("data")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "<h1>Table of Contents</h1>")
-	fmt.Fprintf(w, "<ul>")
-  log.Println(len(files))
-	for _, f := range files {
-		name := f.Name()
-		log.Println(name)
-		if strings.HasSuffix(name, ".txt") {
-			fmt.Fprintf(w, "<li>%s<li>", name[:len(name)-4])
-		}
+
+	names := make([]string, len(files))
+	for _, n := range files {
+		log.Println(n.Name())
+		name, _ := strings.CutSuffix(n.Name(), ".txt")
+		names = append(names, name)
 	}
-	fmt.Fprintf(w, "</ul>")
+	log.Printf("len(names)=%d\n", len(names))
+	if err = templates.ExecuteTemplate(w, "index.html", names); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
@@ -99,7 +99,7 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 }
 
 func main() {
-	http.HandleFunc("/", tocHandler)
+	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
