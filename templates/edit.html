@@ -1,7 +1,23 @@
-<h1>Editing {{.Title}}</h1>
+<!DOCTYPE html>
+<html lang="en">
 
-<form action="/save/{{.Title}}" method="POST">
-  <div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
-  <div><input type="submit" value="Save"></div>
-</form>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editing {{.Title}}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css"
+    crossorigin="anonymous">
+</head>
 
+<body>
+  <nav>[<a href="/">Contents</a>]</nav>
+  <main>
+    <h2>Editing {{.Title}}</h2>
+    <form action="/save/{{.Title}}" method="POST">
+      <div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
+      <div><input type="submit" value="Save"></div>
+    </form>
+  </main>
+</body>
+
+</html>
